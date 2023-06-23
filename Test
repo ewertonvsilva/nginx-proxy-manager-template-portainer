@@ -1,0 +1,48 @@
+import requests
+from googleapiclient.discovery import build
+
+# Set your API key and project details
+api_key = 'your-api-key'
+project_id = 'your-project-id'
+
+# Set up the proxy configuration
+proxy_host = 'proxy.example.com'
+proxy_port = 8080
+proxy_user = 'proxy_username'
+proxy_pass = 'proxy_password'
+
+# Set the proxy configuration in requests library
+proxies = {
+    'http': f'http://{proxy_user}:{proxy_pass}@{proxy_host}:{proxy_port}',
+    'https': f'https://{proxy_user}:{proxy_pass}@{proxy_host}:{proxy_port}'
+}
+# If your proxy does not require authentication, you can use the following simpler format:
+# proxies = {
+#     'http': f'http://{proxy_host}:{proxy_port}',
+#     'https': f'https://{proxy_host}:{proxy_port}'
+# }
+
+# Create a session object with the proxy settings
+session = requests.Session()
+session.proxies.update(proxies)
+
+# Create a service object for the Translation API using the session object
+service = build('translate', 'v2', developerKey=api_key, requestBuilder=session)
+
+# Set the word to be translated
+word = 'hello'
+
+# Translate the word
+translation = service.translations().list(
+    q=word,
+    target='fr',  # Specify the target language code (e.g., 'fr' for French)
+    source='en',  # Specify the source language code (e.g., 'en' for English)
+    format='text',
+    model='nmt'
+).execute()
+
+# Extract the translated text
+translated_word = translation['translations'][0]['translatedText']
+
+# Print the translated word
+print(f'Translated word: {translated_word}')
